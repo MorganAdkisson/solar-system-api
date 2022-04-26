@@ -31,3 +31,17 @@ def get_all_planets():
             "num_moons": planet.num_moons
         })
     return jsonify(planets_response)
+
+@planets_bp.route("/<planet_id>", methods=["GET"])
+def get_planet_by_id(planet_id):
+    response = None
+    for planet in planets:
+        if planet.id == int(planet_id):
+            response = {
+            "id": planet.id, 
+            "name": planet.name, 
+            "description": planet.description, 
+            "num_moons": planet.num_moons
+        }
+            return jsonify(response)
+
