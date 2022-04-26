@@ -35,13 +35,20 @@ def get_all_planets():
 @planets_bp.route("/<planet_id>", methods=["GET"])
 def get_planet_by_id(planet_id):
     response = None
+    try:
+        planet_id = int(planet_id)
+    except ValueError:
+        return jsonify({"message": f"The planet id {planet_id} is invalid. The id must be integer."}, 400)
     for planet in planets:
-        if planet.id == int(planet_id):
+        if planet.id == planet_id:
             response = {
             "id": planet.id, 
             "name": planet.name, 
             "description": planet.description, 
             "num_moons": planet.num_moons
         }
-            return jsonify(response)
+
+    if response is None:
+        return jsonify({"message": f"The planet id {planet_id} is not found"}, 404)
+    return jsonify(response)
 
