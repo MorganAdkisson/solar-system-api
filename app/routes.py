@@ -3,7 +3,6 @@ from app import db
 from app.models.planets import Planets
 
 planets_bp = Blueprint("planets", __name__, url_prefix="/planets")
-
 @planets_bp.route("", methods=["POST"])
 def create_planet():
     planets_response = request.get_json()
@@ -21,8 +20,22 @@ def create_planet():
 
 @planets_bp.route("", methods=["GET"])
 def get_all_planets():
+    params = request.args
+    if "name" in params and "num_moons" in params:
+        planet_name = params["name"]
+        num_moons_value = params["num_moons"]
+        planets = Planets.query.filter_by(name=planet_name, num_moons=num_moons_value)
+
+    if "name" in params:
+        planet_name = params["name"]
+        planets = Planets.query.filter_by(name=planet_name)
+    elif "num_moons" in params:
+        num_moons_value = params["num_moons"]
+        planets = Planets.query.filter_by(num_moons=num_moons_value)
+    else:
+        planets = Planets.query.all()
+
     response_body = []
-    planets = Planets.query.all()
     for planet in planets:
         response_body.append({
             "id": planet.id,
@@ -31,7 +44,6 @@ def get_all_planets():
             "num_moons": planet.num_moons
         })
     return jsonify(response_body)
-
 
 def validate_planet_id(planet_id):
     try:
@@ -58,7 +70,6 @@ def get_planet_by_id(planet_id):
 @planets_bp.route("/<planet_id>", methods=["PUT"])
 def replace_one_planet(planet_id):
     planet = validate_planet_id(planet_id)
-
     planets_request = request.get_json()
     planet.name = planets_request["name"]
     planet.description = planets_request["description"]
@@ -71,7 +82,6 @@ def replace_one_planet(planet_id):
 @planets_bp.route("/<planet_id>", methods=["DELETE"])
 def delete_one_planet(planet_id):
     planet = validate_planet_id(planet_id)
-
     db.session.delete(planet)
     db.session.commit()
 
