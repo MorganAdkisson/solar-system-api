@@ -18,17 +18,30 @@ def create_planet():
         "id": new_planet.id
     }, 201
 
+@planets_bp.route("/<planet_id>", methods=["PUT"])
+def replace_one_planet(planet_id):
+    planet = validate_planet_id(planet_id)
+    planets_request = request.get_json()
+    planet.name = planets_request["name"]
+    planet.description = planets_request["description"]
+    planet.num_moons = planets_request["num_moons"]
+
+    db.session.commit()
+
+    return jsonify({'msg': f"Successfully replaced planet with id {planet_id}"})
+
+
 @planets_bp.route("", methods=["GET"])
 def get_all_planets():
     params = request.args
     if "name" in params and "num_moons" in params:
         planet_name = params["name"]
         num_moons_value = params["num_moons"]
-        planets = Planets.query.filter_by(name=planet_name, num_moons=num_moons_value)
+        planets = Planets.query.filter_by(name=planet_name.capitalize(), num_moons=num_moons_value)
 
     if "name" in params:
         planet_name = params["name"]
-        planets = Planets.query.filter_by(name=planet_name)
+        planets = Planets.query.filter_by(name=planet_name.capitalize())
     elif "num_moons" in params:
         num_moons_value = params["num_moons"]
         planets = Planets.query.filter_by(num_moons=num_moons_value)
@@ -67,17 +80,6 @@ def get_planet_by_id(planet_id):
     "num_moons": planet_request_body.num_moons
     }
 
-@planets_bp.route("/<planet_id>", methods=["PUT"])
-def replace_one_planet(planet_id):
-    planet = validate_planet_id(planet_id)
-    planets_request = request.get_json()
-    planet.name = planets_request["name"]
-    planet.description = planets_request["description"]
-    planet.num_moons = planets_request["num_moons"]
-
-    db.session.commit()
-
-    return jsonify({'msg': f"Successfully replaced planet with id {planet_id}"})
 
 @planets_bp.route("/<planet_id>", methods=["DELETE"])
 def delete_one_planet(planet_id):
