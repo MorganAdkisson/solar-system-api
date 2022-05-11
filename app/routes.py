@@ -3,6 +3,7 @@ from app import db
 from app.models.planets import Planets
 
 planets_bp = Blueprint("planets", __name__, url_prefix="/planets")
+
 @planets_bp.route("", methods=["POST"])
 def create_planet():
     planets_response = request.get_json()
